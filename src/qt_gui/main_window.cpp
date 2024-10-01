@@ -521,7 +521,7 @@ void MainWindow::CreateConnects() {
 
 void MainWindow::StartGame() {
     isGameRunning = true;
-    // BackgroundMusicPlayer::getInstance().stopMusic();
+    //BackgroundMusicPlayer::getInstance().stopMusic();
     QString gamePath = "";
     int table_mode = Config::getTableMode();
     if (table_mode == 0) {
