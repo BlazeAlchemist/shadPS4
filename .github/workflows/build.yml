@@ -58,6 +58,7 @@ jobs:
         echo "shorthash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   windows-sdl:
+    if: false
     runs-on: windows-latest
     needs: get-info
     steps:
@@ -102,6 +103,7 @@ jobs:
         path: ${{github.workspace}}/build/shadPS4.exe
 
   windows-qt:
+    if: false
     runs-on: windows-latest
     needs: get-info
     steps:
@@ -163,6 +165,7 @@ jobs:
         path: upload/
 
   macos-sdl:
+    if: false
     runs-on: macos-latest
     needs: get-info
     steps:
@@ -219,6 +222,7 @@ jobs:
         path: shadps4-macos-sdl.tar.gz
 
   macos-qt:
+    if: false
     runs-on: macos-latest
     needs: get-info
     steps:
@@ -283,6 +287,7 @@ jobs:
         path: shadps4-macos-qt.tar.gz
 
   linux-sdl:
+    if: false
     runs-on: ubuntu-24.04
     needs: get-info
     steps:
@@ -387,7 +392,7 @@ jobs:
 
   pre-release:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [get-info, windows-sdl, windows-qt, macos-sdl, macos-qt, linux-sdl, linux-qt]
+    needs: [get-info, linux-qt]
     runs-on: ubuntu-latest
     steps:
     - name: Download all artifacts
