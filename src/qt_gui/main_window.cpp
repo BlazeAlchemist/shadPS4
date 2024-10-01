@@ -308,7 +308,7 @@ void MainWindow::CreateConnects() {
     });
     // List
     connect(ui->setlistModeListAct, &QAction::triggered, m_dock_widget.data(), [this]() {
-        //BackgroundMusicPlayer::getInstance().stopMusic();
+        BackgroundMusicPlayer::getInstance().stopMusic();
         m_dock_widget->setWidget(m_game_list_frame.data());
         m_game_grid_frame->hide();
         m_elf_viewer->hide();
@@ -325,7 +325,7 @@ void MainWindow::CreateConnects() {
     });
     // Grid
     connect(ui->setlistModeGridAct, &QAction::triggered, m_dock_widget.data(), [this]() {
-        //BackgroundMusicPlayer::getInstance().stopMusic();
+        BackgroundMusicPlayer::getInstance().stopMusic();
         m_dock_widget->setWidget(m_game_grid_frame.data());
         m_game_grid_frame->show();
         m_game_list_frame->hide();
@@ -342,7 +342,7 @@ void MainWindow::CreateConnects() {
     });
     // Elf
     connect(ui->setlistElfAct, &QAction::triggered, m_dock_widget.data(), [this]() {
-        //BackgroundMusicPlayer::getInstance().stopMusic();
+        BackgroundMusicPlayer::getInstance().stopMusic();
         m_dock_widget->setWidget(m_elf_viewer.data());
         m_game_grid_frame->hide();
         m_game_list_frame->hide();
@@ -521,7 +521,7 @@ void MainWindow::CreateConnects() {
 
 void MainWindow::StartGame() {
     isGameRunning = true;
-    // BackgroundMusicPlayer::getInstance().stopMusic();
+    BackgroundMusicPlayer::getInstance().stopMusic();
     QString gamePath = "";
     int table_mode = Config::getTableMode();
     if (table_mode == 0) {
@@ -605,7 +605,7 @@ void MainWindow::ConfigureGuiFromSettings() {
     } else {
         ui->setlistModeGridAct->setChecked(true);
     }
-    //BackgroundMusicPlayer::getInstance().setVolume(Config::getBGMvolume());
+    BackgroundMusicPlayer::getInstance().setVolume(Config::getBGMvolume());
 }
 
 void MainWindow::SaveWindowState() const {
