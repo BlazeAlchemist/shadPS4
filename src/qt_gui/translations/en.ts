@@ -534,6 +534,16 @@
 			<source>Volume</source>
 			<translation>Volume</translation>
 		</message>
+		<message>
+			<location filename="../settings_dialog.ui" line="455"/>
+			<source>Controller Settings</source>
+			<translation>Controller Settings</translation>
+		</message>
+		<message>
+			<location filename="../settings_dialog.ui" line="467"/>
+			<source>Back Button Behavior</source>
+			<translation>Back Button Behavior</translation>
+		</message>
 	</context>
 	<context>
 		<name>MainWindow</name>
@@ -1024,6 +1034,31 @@
 			<translation>Play Title Music:\nIf a game supports it, enable playing special music when selecting the game in the GUI.</translation>
 		</message>
 		<message>
+			<location filename="../settings_dialog.cpp" line="330"/>
+			<source>backButtonBehaviorGroupBox</source>
+			<translation>Back Button Behavior:\nAllows setting which part of the touchpad the back button will emulate a touch on.</translation>
+		</message>
+		<message>
+			<location filename="../settings_dialog.cpp" line="101"/>
+			<source>Touchpad Left</source>
+			<translation>Touchpad Left</translation>
+		</message>
+		<message>
+			<location filename="../settings_dialog.cpp" line="102"/>
+			<source>Touchpad Right</source>
+			<translation>Touchpad Right</translation>
+		</message>
+		<message>
+			<location filename="../settings_dialog.cpp" line="103"/>
+			<source>Touchpad Center</source>
+			<translation>Touchpad Center</translation>
+		</message>
+		<message>
+			<location filename="../settings_dialog.cpp" line="104"/>
+			<source>None</source>
+			<translation>None</translation>
+		</message>
+		<message>
 			<location filename="../settings_dialog.cpp" line="312"/>
 			<source>graphicsAdapterGroupBox</source>
 			<translation>Graphics Device:\nOn multiple GPU systems, select the GPU the emulator will use from the drop down list,\nor select "Auto Select" to automatically determine it.</translation>
@@ -1110,6 +1145,11 @@
 			<location filename="../game_list_frame.cpp" line="35"/>
 			<source>Path</source>
 			<translation>Path</translation>
+		</message>
+		<message>
+			<location filename="../game_list_frame.cpp" line="38"/>
+			<source>Play Time</source>
+			<translation>Play Time</translation>
 		</message>
 	</context>
 	<context>
