@@ -3,7 +3,11 @@
 
 name: Build and Release
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
 
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.ref }}
@@ -54,6 +58,7 @@ jobs:
         echo "shorthash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   windows-sdl:
+    if: false
     runs-on: windows-latest
     needs: get-info
     steps:
@@ -98,6 +103,7 @@ jobs:
         path: ${{github.workspace}}/build/shadPS4.exe
 
   windows-qt:
+    if: false
     runs-on: windows-latest
     needs: get-info
     steps:
@@ -159,6 +165,7 @@ jobs:
         path: upload/
 
   macos-sdl:
+    if: false
     runs-on: macos-latest
     needs: get-info
     steps:
@@ -215,6 +222,7 @@ jobs:
         path: shadps4-macos-sdl.tar.gz
 
   macos-qt:
+    if: false
     runs-on: macos-latest
     needs: get-info
     steps:
@@ -383,7 +391,7 @@ jobs:
 
   pre-release:
     if: github.ref == 'refs/heads/main' && github.repository == 'shadps4-emu/shadPS4' && github.event_name == 'push'
-    needs: [get-info, windows-sdl, windows-qt, macos-sdl, macos-qt, linux-sdl, linux-qt]
+    needs: [get-info, linux-sdl, linux-qt]
     runs-on: ubuntu-latest
     steps:
     - name: Download all artifacts
