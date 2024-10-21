@@ -19,6 +19,7 @@ using namespace Core::Devtools;
 using L = Core::Devtools::Layer;
 
 static bool show_simple_fps = false;
+static bool visibility_toggled = false;
 
 static float fps_scale = 1.0f;
 static bool show_advanced_debug = false;
@@ -31,6 +32,12 @@ static float debug_popup_timing = 3.0f;
 
 static bool just_opened_options = false;
 
+// clang-format off
+static std::string help_text =
+#include "help.txt"
+    ;
+// clang-format on
+
 void L::DrawMenuBar() {
     const auto& ctx = *GImGui;
     const auto& io = ctx.IO;
@@ -38,6 +45,7 @@ void L::DrawMenuBar() {
     auto isSystemPaused = DebugState.IsGuestThreadsPaused();
 
     bool open_popup_options = false;
+    bool open_popup_help = false;
 
     if (BeginMainMenuBar()) {
         if (BeginMenu("Options")) {
@@ -60,6 +68,7 @@ void L::DrawMenuBar() {
                 ImGui::EndMenu();
             }
             open_popup_options = MenuItem("Options");
+            open_popup_help = MenuItem("Help & Tips");
             ImGui::EndMenu();
         }
         EndMainMenuBar();
@@ -83,6 +92,9 @@ void L::DrawMenuBar() {
     if (open_popup_options) {
         OpenPopup("GPU Tools Options");
         just_opened_options = true;
+    }
+    if (open_popup_help) {
+        OpenPopup("HelpTips");
     }
 }
 
@@ -154,23 +166,47 @@ void L::DrawAdvanced() {
     if (BeginPopupModal("GPU Tools Options", &close_popup_options,
                         ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
         static char disassembly_cli[512];
+        static bool frame_dump_render_on_collapse;
 
         if (just_opened_options) {
             just_opened_options = false;
             auto s = Options.disassembly_cli.copy(disassembly_cli, sizeof(disassembly_cli) - 1);
             disassembly_cli[s] = '\0';
+            frame_dump_render_on_collapse = Options.frame_dump_render_on_collapse;
         }
 
         InputText("Shader disassembler: ", disassembly_cli, sizeof(disassembly_cli));
         if (IsItemHovered()) {
             SetTooltip(R"(Command to disassemble shaders. Example "dis.exe" --raw "{src}")");
         }
+        Checkbox("Show frame dump popups even when collapsed", &frame_dump_render_on_collapse);
+        if (IsItemHovered()) {
+            SetTooltip("When a frame dump is collapsed, it will keep\n"
+                       "showing all opened popups related to it");
+        }
 
         if (Button("Save")) {
             Options.disassembly_cli = disassembly_cli;
+            Options.frame_dump_render_on_collapse = frame_dump_render_on_collapse;
             SaveIniSettingsToDisk(io.IniFilename);
             CloseCurrentPopup();
         }
+        EndPopup();
+    }
+
+    if (BeginPopup("HelpTips", ImGuiWindowFlags_AlwaysAutoResize |
+                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove)) {
+        CentralizeWindow();
+
+        PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{10.0f});
+        PushTextWrapPos(600.0f);
+
+        const char* begin = help_text.data();
+        TextUnformatted(begin, begin + help_text.size());
+
+        PopTextWrapPos();
+        PopStyleVar();
+
         EndPopup();
     }
 }
@@ -261,20 +297,24 @@ void L::Draw() {
         const auto fn = DebugState.flip_frame_count.load();
         frame_graph.AddFrame(fn, io.DeltaTime);
     }
-
     if (IsKeyPressed(ImGuiKey_F10, false)) {
         if (io.KeyCtrl) {
             show_advanced_debug = !show_advanced_debug;
         } else {
             show_simple_fps = !show_simple_fps;
         }
+        visibility_toggled = true;
     }
 
     if (show_simple_fps) {
         if (Begin("Video Info", nullptr,
                   ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
                       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
-            SetWindowPos("Video Info", {999999.0f, 0.0f}, ImGuiCond_FirstUseEver);
+            // Set window position to top left if it was toggled on
+            if (visibility_toggled) {
+                SetWindowPos("Video Info", {999999.0f, 0.0f}, ImGuiCond_Always);
+                visibility_toggled = false;
+            }
             if (BeginPopupContextWindow()) {
 #define M(label, value)                                                                            \
     if (MenuItem(label, nullptr, fps_scale == value))                                              \
