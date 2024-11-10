@@ -25,6 +25,15 @@ ComputePipeline::ComputePipeline(const Instance& instance_, Scheduler& scheduler
 
     u32 binding{};
     boost::container::small_vector<vk::DescriptorSetLayoutBinding, 32> bindings;
+
+    if (info->has_readconst) {
+        bindings.push_back({
+            .binding = binding++,
+            .descriptorType = vk::DescriptorType::eUniformBuffer,
+            .descriptorCount = 1,
+            .stageFlags = vk::ShaderStageFlagBits::eCompute,
+        });
+    }
     for (const auto& buffer : info->buffers) {
         const auto sharp = buffer.GetSharp(*info);
         bindings.push_back({
@@ -127,17 +136,32 @@ bool ComputePipeline::BindResources(VideoCore::BufferCache& buffer_cache,
     // we can skip the whole dispatch and update the tracked state instead. Also, it is not
     // intended to be consumed and in such rare cases (e.g. HTile introspection, CRAA) we
     // will need its full emulation anyways. For cases of metadata read a warning will be logged.
-    for (const auto& desc : info->texture_buffers) {
+    const auto IsMetaUpdate = [&](const auto& desc) {
         const VAddr address = desc.GetSharp(*info).base_address;
         if (desc.is_written) {
             if (texture_cache.TouchMeta(address, true)) {
                 LOG_TRACE(Render_Vulkan, "Metadata update skipped");
-                return false;
+                return true;
             }
         } else {
             if (texture_cache.IsMeta(address)) {
                 LOG_WARNING(Render_Vulkan, "Unexpected metadata read by a CS shader (buffer)");
             }
+        }
+        return false;
+    };
+
+    for (const auto& desc : info->buffers) {
+        if (desc.is_gds_buffer) {
+            continue;
+        }
+        if (IsMetaUpdate(desc)) {
+            return false;
+        }
+    }
+    for (const auto& desc : info->texture_buffers) {
+        if (IsMetaUpdate(desc)) {
+            return false;
         }
     }
 

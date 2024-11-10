@@ -31,6 +31,7 @@ endif()
 
 option(ENABLE_QT_GUI "Enable the Qt GUI. If not selected then the emulator uses a minimal SDL-based UI instead" OFF)
 option(ENABLE_DISCORD_RPC "Enable the Discord RPC integration" ON)
+option(ENABLE_UPDATER "Enables the options to updater" ON)
 
 # First, determine whether to use CMAKE_OSX_ARCHITECTURES or CMAKE_SYSTEM_PROCESSOR.
 if (APPLE AND CMAKE_OSX_ARCHITECTURES)
@@ -179,12 +180,25 @@ set(AUDIO_CORE src/audio_core/sdl_audio.cpp
                src/audio_core/sdl_audio.h
 )
 
+set(AJM_LIB src/core/libraries/ajm/ajm.cpp
+            src/core/libraries/ajm/ajm.h
+            src/core/libraries/ajm/ajm_at9.cpp
+            src/core/libraries/ajm/ajm_at9.h
+            src/core/libraries/ajm/ajm_batch.cpp
+            src/core/libraries/ajm/ajm_batch.h
+            src/core/libraries/ajm/ajm_context.cpp
+            src/core/libraries/ajm/ajm_context.h
+            src/core/libraries/ajm/ajm_error.h
+            src/core/libraries/ajm/ajm_instance.cpp
+            src/core/libraries/ajm/ajm_instance.h
+            src/core/libraries/ajm/ajm_mp3.cpp
+            src/core/libraries/ajm/ajm_mp3.h
+)
+
 set(AUDIO_LIB src/core/libraries/audio/audioin.cpp
               src/core/libraries/audio/audioin.h
               src/core/libraries/audio/audioout.cpp
               src/core/libraries/audio/audioout.h
-              src/core/libraries/ajm/ajm.cpp
-              src/core/libraries/ajm/ajm.h
               src/core/libraries/ngs2/ngs2.cpp
               src/core/libraries/ngs2/ngs2.h
 )
@@ -194,8 +208,7 @@ set(GNM_LIB src/core/libraries/gnmdriver/gnmdriver.cpp
             src/core/libraries/gnmdriver/gnm_error.h
 )
 
-set(KERNEL_LIB
-               src/core/libraries/kernel/event_flag/event_flag.cpp
+set(KERNEL_LIB src/core/libraries/kernel/event_flag/event_flag.cpp
                src/core/libraries/kernel/event_flag/event_flag.h
                src/core/libraries/kernel/event_flag/event_flag_obj.cpp
                src/core/libraries/kernel/event_flag/event_flag_obj.h
@@ -290,8 +303,6 @@ set(SYSTEM_LIBS src/core/libraries/system/commondialog.cpp
                 src/core/libraries/audio3d/audio3d_error.h
                 src/core/libraries/audio3d/audio3d_impl.cpp
                 src/core/libraries/audio3d/audio3d_impl.h
-                src/core/libraries/ime/ime.cpp
-                src/core/libraries/ime/ime.h
                 src/core/libraries/game_live_streaming/gamelivestreaming.cpp
                 src/core/libraries/game_live_streaming/gamelivestreaming.h
                 src/core/libraries/remote_play/remoteplay.cpp
@@ -311,13 +322,17 @@ set(LIBC_SOURCES src/core/libraries/libc_internal/libc_internal.cpp
                  src/core/libraries/libc_internal/libc_internal.h
 )
 
-set(DIALOGS_LIB src/core/libraries/dialogs/error_dialog.cpp
-                src/core/libraries/dialogs/error_dialog.h
-                src/core/libraries/dialogs/ime_dialog_ui.cpp
-                src/core/libraries/dialogs/ime_dialog_ui.h
-                src/core/libraries/dialogs/ime_dialog.cpp
-                src/core/libraries/dialogs/ime_dialog.h
-                src/core/libraries/dialogs/error_codes.h
+set(IME_LIB src/core/libraries/ime/error_dialog.cpp
+            src/core/libraries/ime/error_dialog.h
+            src/core/libraries/ime/ime_common.h
+            src/core/libraries/ime/ime_dialog_ui.cpp
+            src/core/libraries/ime/ime_dialog_ui.h
+            src/core/libraries/ime/ime_dialog.cpp
+            src/core/libraries/ime/ime_dialog.h
+            src/core/libraries/ime/ime_ui.cpp
+            src/core/libraries/ime/ime_ui.h
+            src/core/libraries/ime/ime.cpp
+            src/core/libraries/ime/ime.h
 )
 
 set(PAD_LIB src/core/libraries/pad/pad.cpp
@@ -344,6 +359,17 @@ set(USBD_LIB src/core/libraries/usbd/usbd.cpp
 
 set(FIBER_LIB src/core/libraries/fiber/fiber.cpp
               src/core/libraries/fiber/fiber.h
+)
+
+set(VDEC_LIB src/core/libraries/videodec/videodec2_impl.cpp
+             src/core/libraries/videodec/videodec2_impl.h
+             src/core/libraries/videodec/videodec2.cpp
+             src/core/libraries/videodec/videodec2.h
+             src/core/libraries/videodec/videodec2_avc.h
+             src/core/libraries/videodec/videodec.cpp
+             src/core/libraries/videodec/videodec.h
+             src/core/libraries/videodec/videodec_impl.cpp
+             src/core/libraries/videodec/videodec_impl.h
 )
 
 set(NP_LIBS src/core/libraries/np_manager/np_manager.cpp
@@ -485,6 +511,7 @@ set(CORE src/core/aerolib/stubs.cpp
          src/core/libraries/error_codes.h
          src/core/libraries/libs.h
          src/core/libraries/libs.cpp
+         ${AJM_LIB}
          ${AUDIO_LIB}
          ${GNM_LIB}
          ${KERNEL_LIB}
@@ -499,8 +526,9 @@ set(CORE src/core/aerolib/stubs.cpp
          ${RANDOM_LIB}
          ${USBD_LIB}
          ${MISC_LIBS}
-         ${DIALOGS_LIB}
+         ${IME_LIB}
          ${FIBER_LIB}
+         ${VDEC_LIB}
          ${DEV_TOOLS}
          src/core/debug_state.cpp
          src/core/debug_state.h
@@ -580,6 +608,7 @@ set(SHADER_RECOMPILER src/shader_recompiler/exception.h
                       src/shader_recompiler/frontend/structured_control_flow.h
                       src/shader_recompiler/ir/passes/constant_propagation_pass.cpp
                       src/shader_recompiler/ir/passes/dead_code_elimination_pass.cpp
+                      src/shader_recompiler/ir/passes/flatten_extended_userdata_pass.cpp
                       src/shader_recompiler/ir/passes/identity_removal_pass.cpp
                       src/shader_recompiler/ir/passes/ir_passes.h
                       src/shader_recompiler/ir/passes/lower_shared_mem_to_registers.cpp
@@ -708,6 +737,12 @@ set(EMULATOR src/emulator.cpp
 if(ENABLE_QT_GUI)
 qt_add_resources(RESOURCE_FILES src/shadps4.qrc)
 
+if (ENABLE_UPDATER)
+    set(UPDATER src/qt_gui/check_update.cpp
+                src/qt_gui/check_update.h
+    )
+endif()
+
 set(QT_GUI src/qt_gui/about_dialog.cpp
            src/qt_gui/about_dialog.h
            src/qt_gui/about_dialog.ui
@@ -715,8 +750,6 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
            src/qt_gui/background_music_player.h
            src/qt_gui/cheats_patches.cpp
            src/qt_gui/cheats_patches.h
-           src/qt_gui/check_update.cpp
-           src/qt_gui/check_update.h
            src/qt_gui/main_window_ui.h
            src/qt_gui/main_window.cpp
            src/qt_gui/main_window.h
@@ -747,6 +780,7 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
            ${EMULATOR}
            ${RESOURCE_FILES}
            ${TRANSLATIONS}
+           ${UPDATER}
 )
 endif()
 
@@ -784,7 +818,7 @@ endif()
 create_target_directory_groups(shadps4)
 
 target_link_libraries(shadps4 PRIVATE magic_enum::magic_enum fmt::fmt toml11::toml11 tsl::robin_map xbyak::xbyak Tracy::TracyClient RenderDoc::API FFmpeg::ffmpeg Dear_ImGui gcn half::half)
-target_link_libraries(shadps4 PRIVATE Boost::headers GPUOpen::VulkanMemoryAllocator sirit Vulkan::Headers xxHash::xxhash Zydis::Zydis glslang::SPIRV glslang::glslang SDL3::SDL3 pugixml::pugixml)
+target_link_libraries(shadps4 PRIVATE Boost::headers GPUOpen::VulkanMemoryAllocator LibAtrac9 sirit Vulkan::Headers xxHash::xxhash Zydis::Zydis glslang::SPIRV glslang::glslang SDL3::SDL3 pugixml::pugixml)
 
 target_compile_definitions(shadps4 PRIVATE IMGUI_USER_CONFIG="imgui/imgui_config.h")
 target_compile_definitions(Dear_ImGui PRIVATE IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/src/imgui/imgui_config.h")
@@ -819,8 +853,11 @@ else()
 endif()
 
 if (ENABLE_QT_GUI)
-   target_link_libraries(shadps4 PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Network Qt6::Multimedia)
-   add_definitions(-DENABLE_QT_GUI)
+    target_link_libraries(shadps4 PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Network Qt6::Multimedia)
+    add_definitions(-DENABLE_QT_GUI)
+    if (ENABLE_UPDATER)
+        add_definitions(-DENABLE_UPDATER)
+    endif()
 endif()
 
 if (WIN32)

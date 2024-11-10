@@ -7,7 +7,9 @@
 
 #include "about_dialog.h"
 #include "cheats_patches.h"
+#ifdef ENABLE_UPDATER
 #include "check_update.h"
+#endif
 #include "common/io_file.h"
 #include "common/path_util.h"
 #include "common/scm_rev.h"
@@ -59,8 +61,10 @@ bool MainWindow::Init() {
     this->show();
     // load game list
     LoadGameLists();
+#ifdef ENABLE_UPDATER
     // Check for update
     CheckUpdateMain(true);
+#endif
 
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -183,6 +187,7 @@ void MainWindow::LoadGameLists() {
     }
 }
 
+#ifdef ENABLE_UPDATER
 void MainWindow::CheckUpdateMain(bool checkSave) {
     if (checkSave) {
         if (!Config::autoUpdate()) {
@@ -192,6 +197,7 @@ void MainWindow::CheckUpdateMain(bool checkSave) {
     auto checkUpdate = new CheckUpdate(false);
     checkUpdate->exec();
 }
+#endif
 
 void MainWindow::GetPhysicalDevices() {
     Vulkan::Instance instance(false, false);
@@ -254,10 +260,12 @@ void MainWindow::CreateConnects() {
         settingsDialog->exec();
     });
 
+#ifdef ENABLE_UPDATER
     connect(ui->updaterAct, &QAction::triggered, this, [this]() {
         auto checkUpdate = new CheckUpdate(true);
         checkUpdate->exec();
     });
+#endif
 
     connect(ui->aboutAct, &QAction::triggered, this, [this]() {
         auto aboutDialog = new AboutDialog(this);
@@ -673,6 +681,12 @@ void MainWindow::InstallDragDropPkg(std::filesystem::path file, int pkgNum, int 
             QMessageBox::critical(this, tr("PKG ERROR"), QString::fromStdString(failreason));
             return;
         }
+        if (!psf.Open(pkg.sfo)) {
+            QMessageBox::critical(this, tr("PKG ERROR"),
+                                  "Could not read SFO. Check log for details");
+            return;
+        }
+        auto category = psf.GetString("CATEGORY");
         InstallDirSelect ids;
         ids.exec();
         auto game_install_dir = ids.getSelectedDirectory();
@@ -689,12 +703,6 @@ void MainWindow::InstallDragDropPkg(std::filesystem::path file, int pkgNum, int 
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("PKG Extraction"));
 
-            if (!psf.Open(pkg.sfo)) {
-                QMessageBox::critical(this, tr("PKG ERROR"),
-                                      "Could not read SFO. Check log for details");
-                return;
-            }
-
             std::string content_id;
             if (auto value = psf.GetString("CONTENT_ID"); value.has_value()) {
                 content_id = std::string{*value};
@@ -709,7 +717,6 @@ void MainWindow::InstallDragDropPkg(std::filesystem::path file, int pkgNum, int 
             QString addonDirPath;
             Common::FS::PathToQString(addonDirPath, addon_extract_path);
             QDir addon_dir(addonDirPath);
-            auto category = psf.GetString("CATEGORY");
 
             if (pkgType.contains("PATCH")) {
                 QString pkg_app_version;
@@ -802,9 +809,10 @@ void MainWindow::InstallDragDropPkg(std::filesystem::path file, int pkgNum, int 
             }
         } else {
             // Do nothing;
-            if (pkgType.contains("PATCH")) {
-                QMessageBox::information(this, tr("PKG Extraction"),
-                                         tr("PKG is a patch, please install the game first!"));
+            if (pkgType.contains("PATCH") || category == "ac") {
+                QMessageBox::information(
+                    this, tr("PKG Extraction"),
+                    tr("PKG is a patch or DLC, please install the game first!"));
                 return;
             }
             // what else?
@@ -933,7 +941,9 @@ void MainWindow::SetUiIcons(bool isWhite) {
     ui->bootInstallPkgAct->setIcon(RecolorIcon(ui->bootInstallPkgAct->icon(), isWhite));
     ui->bootGameAct->setIcon(RecolorIcon(ui->bootGameAct->icon(), isWhite));
     ui->exitAct->setIcon(RecolorIcon(ui->exitAct->icon(), isWhite));
+#ifdef ENABLE_UPDATER
     ui->updaterAct->setIcon(RecolorIcon(ui->updaterAct->icon(), isWhite));
+#endif
     ui->downloadCheatsPatchesAct->setIcon(
         RecolorIcon(ui->downloadCheatsPatchesAct->icon(), isWhite));
     ui->dumpGameListAct->setIcon(RecolorIcon(ui->dumpGameListAct->icon(), isWhite));

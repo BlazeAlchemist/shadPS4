@@ -261,6 +261,13 @@ struct Image {
         return last_level + 1;
     }
 
+    u32 NumSamples() const {
+        if (GetType() == ImageType::Color2DMsaa || GetType() == ImageType::Color2DMsaaArray) {
+            return 1u << last_level;
+        }
+        return 1;
+    }
+
     ImageType GetType() const noexcept {
         return static_cast<ImageType>(type);
     }
@@ -286,6 +293,11 @@ struct Image {
 
     bool IsTiled() const {
         return GetTilingMode() != TilingMode::Display_Linear;
+    }
+
+    bool IsFmask() const noexcept {
+        return GetDataFmt() >= DataFormat::FormatFmask8_1 &&
+               GetDataFmt() <= DataFormat::FormatFmask64_8;
     }
 
     bool IsPartialCubemap() const {
